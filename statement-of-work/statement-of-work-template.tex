@@ -195,7 +195,7 @@ Proofpoint's solution currently redirects every URL embedded in an email through
 \\\\
 However, sandboxing is slow, which makes it expensive in both time and money. Given the billions of emails Proofpoint's security suite sees every day, it is unfeasible to sandbox every single one. It would therefore be useful to have a more effective way of determining which URLs are malicious, as this would significantly reduce the number of URLs that have to go through the expensive sandboxing process.
 \\\\
-Although their current method of predicting malicious URLs is relatively effective, there is much room for improvement. Proofpoint is interested in improving the number of URLs blocked overall, but also the number of URLs blocked before the client has a chance to click on them. Our team believes that methods of machine learning are well suited for this problem: given the vast amounts of data, classification and pattern matching are exactly the kinds of solutions needed for this problem. Our hypothesis is that there are common characteristics shared by malicious URLs, and indeed, others before us have investigated such characteristics (see section on \textit{Approaches}). An effective learning technique could determine these characteristics and use them as facets of a learning model. For this reason, we plan on employing a number of different machine learning techniques to the malicious URL detection problem.
+Although their current method of predicting malicious URLs is relatively effective, there is much room for improvement. Proofpoint is interested in improving the number of URLs blocked overall, but also the number of URLs blocked before the client has a chance to click on them. Our team believes that methods of machine learning are well suited for this problem: given the vast amounts of data, classification and pattern matching are exactly the kinds of solutions needed for this problem. Our hypothesis is that there are common characteristics shared by malicious URLs, and indeed, others before us have investigated such characteristics (see section \ref{classifiers}). An effective learning technique could determine these characteristics and use them as facets of a learning model. For this reason, we plan on employing a number of different machine learning techniques to the malicious URL detection problem.
 
 \section{Problem Statement}
 
@@ -220,6 +220,16 @@ The system we aim to build must have the following features:
 \item Using the above score, each sample will be classified as either dangerous or not, based on some cutoff. For instance, if we decide on a cutoff of 0.7, then anything with a score of 0.7 or above will be considered dangerous.
 \item Our model will explain how the score was assigned, for instance by pointing to characteristics of the URL that make it more likely that it is malicious.
 \end{enumerate}
+
+\section{Classifier Types} \label{classifiers}
+
+The following is a summary of the classifiers our team will investigate over the course of this project.
+
+\subsection{Naive Bayes}
+
+\subsection{Support Vector Machines}
+
+\subsection{Clustering}
 
 \newpage
 
