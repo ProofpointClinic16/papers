@@ -264,6 +264,16 @@ Furthermore, we will have to evaluate the results of our clustering. We may do s
 
 We will investigate how we can combine cluster analysis with SVMs in order to avoid having to update the SVM model constantly, which takes a significant amount of time. Instead we only use specific clusters from our cluster analysis to update the SVMs.
 
+\subsection{Neural Networks}
+
+Another approach that we will explore further is the use of \textit{neural networks} in improving our classifier mechanism. These networks get their name from being architecturally modeled after the central nervous systems of animals; they are designed to emulate the connections between neurons in the brain.
+
+Neural networks can be understood as \textit{layers} of classifiers, where each layer uses the results of the previous layer to refine its results. A neural network is represented by a graph composed of multiple layers of ``neurons,'' or classifiers, except for the first layer. The neurons in the first layer, the ``input layer,'' are simply features, much like in Bayes' nets. Edges connect these feature neurons to the ``hidden layer,'' which is composed of classifiers. The first layer of classifiers uses these input features to classify the data sample. The second layer of classifiers uses the results of the first layer \textit{as its features} to classify the sample once more. This continues until the ``output layer,'' where the system produces a final classification (``Multi-Layer Neural Network'').
+
+There are a number of types of neural networks that may be useful to us. For instance, recurrent neural networks involve the neurons feeding back into themselves, creating cycles that produce a ``memory'' of sorts. Such a network is well-suited for an arbitrary sequence of inputs, where it is difficult to anticipate the end of the sample.
+
+The opposite of recurrent networks are called feedforward neural networks. These are networks that do not have directed cycles like those contained in recurrent neural networks. While they cannot ``memorize'' in the same way recurrent networks can, one specific type of feedforward net that we wish to investigate is called a convolutional neural network. In these networks, a technique known as convolution is used to represent multiple data points through a single node, making them well-suited for problems involving data on a large scale.
+
 %%%
 
 \section{Feature Selection} \label{feature-selection}
@@ -378,6 +388,10 @@ We intend to primarily use Python for its native JSON support and the many Pytho
 \hangindent=2em
 \hangafter=1
 Ma, Justin, Lawrence K. Saul, Stefan Savage, and Geoffrey M. Voelker. ``Beyond Blacklists.'' \textit{15th ACM SIGKDD International Conference on Knowledge Discovery and Data Mining}, 2009, New York, USA. Unpublished conference paper. UCSD Library, 2016. Web.
+
+\hangindent=2em
+\hangafter=1
+\noindent ``Multi-Layer Neural Network.'' \textit{Unsupervised Feature Learning and Deep Learning Tutorial.} Stanford University. Accessed 4 October 2016, \url{http://ufldl.stanford.edu/tutorial/supervised/MultiLayerNeuralNetworks/}.
 
 \hangindent=2em
 \hangafter=1
