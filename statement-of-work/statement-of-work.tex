@@ -198,7 +198,7 @@ Determining the maliciousness of URLs is a critical component of Proofpoint's se
 
 Proofpoint's solution currently redirects every URL embedded in an email through their servers, where they employ a filter to distinguish between URLs that should and should not be blocked. Their current filtration technique has approximately 70\% accuracy in determining whether a URL is malicious. This method checks how many times the URL appears in a certain time period and context, and how many domains it goes through.\footnote{These heuristics are useful because they provide characteristics common to malicious URLs. Many will be sent through multiple domains to try to hide where they came from, and they will be sent multiple times to try to get through to the client.} If a URL reaches a certain threshold with regards to these two test metrics, it will be sent to Proofpoint's \textit{sandboxing environment} for further testing. Sandboxing, the practice of opening a URL on a virtual machine and simulating its effects, is currently the most accurate method of determining whether a URL is malicious. If the sandbox becomes infected with malware, Proofpoint will block that URL in the future.
 
-However, sandboxing is slow, which makes it expensive in both time and money. Given the billions of emails Proofpoint's security suite sees every day, it is unfeasible to sandbox every single one. It would therefore be useful to have a more effective way of determining which URLs are malicious, as this would significantly reduce the number of URLs that have to go through the expensive sandboxing process.
+However, sandboxing is slow, which makes it expensive in both time and money. Given the billions of emails Proofpoint's security suite sees every day, it is unfeasible to sandbox every single one. Reducing the number of emails that are sent to the sandbox is therefore critical. A more effective method of identifying malicious URLs would serve to reduce ambiguity and require fewer expensive operations.
 
 Although their current method of predicting malicious URLs is relatively effective, there is much room for improvement. Proofpoint is interested in improving the number of URLs blocked overall, but also the number of URLs blocked before the client has a chance to click on them. Our team believes that methods of machine learning are well suited for this problem: given the vast amounts of data, classification and pattern matching are exactly the kinds of solutions needed for this problem. Our hypothesis is that there are common characteristics shared by malicious URLs, and indeed, others before us have investigated such characteristics (see section \ref{feature-selection}). An effective learning technique could determine these characteristics and use them as facets of a learning model. For this reason, we plan on employing a number of different machine learning techniques to the malicious URL detection problem.
 
@@ -206,18 +206,18 @@ Although their current method of predicting malicious URLs is relatively effecti
 
 \section{Problem Statement}
 
-Proofpoint processes billions of URLs a day to determine if they are malicious. However, their sandboxing method is much too expensive a process for it to be attempted for every URL they see. Thus, there is a need for better predictive model that reduces the number of expensive sandbox tests that must be performed. This system should learn from existing metadata about URLs. The ideal solution for this problem would be able to learn from its predictions. For example, if it predicts a URL to be malicious, and that URL is deemed safe by the sandboxing environment, the predictor should refine its model to account for this data. The problem, then, is to construct a model with these characteristics that can make these predictions for the vast number of URLs being processed by Proofpoint on a daily basis.
+Proofpoint processes billions of URLs a day to determine if they are malicious, some of which require additional sandbox analysis. Since sandboxing is expensive, there is a need for better predictive model that reduces the number of sandbox tests that must be performed. This system should learn from existing metadata about URLs. The ideal solution for this problem would be able to learn from its predictions. For example, if it predicts a URL to be malicious, and that URL is deemed safe by the sandboxing environment, the predictor should refine its model to account for this data. The problem, then, is to construct a model with these characteristics that can make these predictions for the vast number of URLs being processed by Proofpoint on a daily basis.
 
 %%%
 
 \section{Goals}
 
-Over the course of this academic year, our team intends to design and implement a system that uses machine learning to detect malicious URLs before they are clicked. The primary aim of this systems is to block these URLs before Proofpoint's clients view them, thereby avoiding any opportunity for the URL to be clicked. However, while the primary goal is to block URLs before they are clicked, there are three metrics total that will be measured in order to evaluate the success of our model. These are:
+Over the course of this academic year, our team intends to design and implement a system that uses machine learning to detect malicious URLs. It is possible for the classification process to be delayed such that Proofpoint's clients view and click on URLs before the system has the time to classify them. The primary aim of this systems is to block malicious URLs \textit{before} Proofpoint's clients view them, thereby avoiding any opportunity for the URL to be clicked. However, while the primary goal is to block URLs before they are clicked, there are three metrics total that will be measured in order to evaluate the success of our model. These are:
 
 \begin{itemize} \itemsep0em
-\item The proportion of malicious URLs tagged as malicious before they are clicked
-\item The proportion of malicious URLs tagged as malicious total
-\item The proportion of malicious URLs submitted to the sandbox for additional analysis
+\item The proportion of malicious URLs our classifier correctly tags as malicious, \textit{before} they are clicked
+\item The proportion of malicious URLs our classifier correctly tags as malicious, at any point
+\item The proportion of malicious URLs our classifier submits to the sandbox for additional analysis
 \end{itemize}
 
 We are aiming to improve upon the current proportion of URLs blocked before clicking, which is currently at around 70\%. Although we have no precise numbers to outperform with regards to the other two metrics, our aim is to accurately block as many URLs as possible while minimizing inaccurate predictions.
@@ -234,7 +234,7 @@ The system we aim to build must have the following features:
 
 \section{Classifier Types}
 
-The following are summaries of the classifiers our team will investigate over the course of this project.
+The following are summaries of some of the classifiers our team will investigate over the course of this project.
 
 \subsection{Naive Bayes}
 
@@ -250,7 +250,7 @@ There are two important advantages to this approach. First of all, our establish
 
 Another approach we will consider in our solution is using a support vector machine (SVM). A support vector machine is a supervised learning model that classifies data into one of two categories. An SVM maps data points into an $n$-dimensional space, where $n$ is the number of features being considered. The SVM then constructs a hyperplane that divides the points (which represent the objects being classified) into two parts, such that the distance between the plane and the closest point on either side is maximized. When new data is given to the SVM, it predicts which category the data belongs in based upon which side of the plane it falls on.
 
-There is existing research in the effectiveness of SVMs in spam filtering (Sculley and Wachman). One problem with using SVMs with this type of problem is the increased training time as the size of the data set increases. In the study by Sculley and Wachman, an approach that was successful in combatting this problem is using a relaxed online SVM to achieve an approximate solution. A relaxed online SVM updates its model less frequently than an offline SVM, and it uses a sliding window over the data to ensure that the same amount of learning data is used in each update. This ensures that the training will take roughly the same amount of time each iteration. The results of this study showed that relaxed online SVMs performed nearly as well as offline SVMs that learned from all the data (Sculley and Wachman, 5).
+There is existing research in the effectiveness of SVMs in spam filtering (Sculley and Wachman). One potential issue with using SVMs with this type of problem is the increased training time as the size of the data set increases. In the study by Sculley and Wachman, an approach that was successful in combatting this problem is using a relaxed online SVM to achieve an approximate solution. A relaxed online SVM updates its model less frequently than an offline SVM, and it uses a sliding window over the data to use the same amount of learning data in each update. This ensures that the training will take roughly the same amount of time each iteration. The results of this study showed that relaxed online SVMs performed nearly as well as offline SVMs that learned from all the data (Sculley and Wachman, 5).
 
 We will investigate how beneficial using an SVM would be for our problem. Since it has proven to be effective in other text recognition problems such as spam-filtering, we believe that using an SVM could produce promising results for our classification system. In the process of implementing an SVM, we will explore open source tools and libraries that are available to us. Using an open source library can help us determine if an SVM is a valid approach to solving our problem without having the overhead of implementing our own SVM. 
 
@@ -258,9 +258,9 @@ We will investigate how beneficial using an SVM would be for our problem. Since 
 
 Another approach we will consider when we are creating or improving on our classifier is the use of cluster analysis. Cluster analysis can be simply thought of as the task of grouping up data objects into partitions or ``clusters'' such that data objects in one cluster are more similar to one another than those data objects that are in a different cluster.
 
-The way in which these objects are clustered can vary depending on which aspect of the data is more heavily weighed as a defining characteristic of the group. There are many algorithms that can help determine which specific features of the URLs to cluster by, and so it falls upon the team to produce the algorithms that we will be using for our clustering. There are various approaches to clustering algorithms that we may take, which include: connectivity-based clustering, centroid-based clustering, distribution-based clustering, and density-based clustering. 
+The way in which these objects are clustered can vary depending on which aspect of the data is more heavily weighed as a defining characteristic of the group. These characteristics will depend on which specific features of the URLs we cluster by; thus, as with the other classifiers, feature selection will be crucial. There are various approaches to clustering algorithms that we may take, which include: connectivity-based clustering, centroid-based clustering, distribution-based clustering, and density-based clustering. 
 
-Furthermore, we will have to evaluate the results of our clustering. We may do so through internal or external evaluation. The former method uses the data that was clustered itself to evaluate the results while the latter uses data not used in clustering. It is also important to note that clustering is an iterative process that will need to undergo various trial and error phases in order to learn the aspects that make a good cluster.
+Furthermore, we will have to evaluate the results of our clustering. We may do so through internal or external evaluation. The former method uses the data that was clustered itself to evaluate the results while the latter uses data not used in clustering. It is also important to note that clustering is an iterative process that will need to undergo various trial and error phases in order to learn the features that make a good cluster.
 
 We will investigate how we can combine cluster analysis with SVMs in order to avoid having to update the SVM model constantly, which takes a significant amount of time. Instead we only use specific clusters from our cluster analysis to update the SVMs.
 
@@ -270,13 +270,13 @@ We will investigate how we can combine cluster analysis with SVMs in order to av
 
 For all of the classifiers discussed above, feature selection is crucial. Choosing features that serve as good indicators of positive or negative results is necessary for accurate classification. Recall that features are characteristics of the data sample being analyzed, in our case a URL embedded in an email. One example would be the number of periods in a URL.
 
-Existing research using lexical and WHOIS features to detect malicious URLs has been quite successful, with a 90-95\% detection rate (Ma et al., 1). Lexical features are the textual properties of the URL itself, and WHOIS data gives the registration date/user of the given domain. But it should be noted that they did not consider URL page content or the type of email the URL is embedded in; they ignored such contextual information altogether.
+Existing research using \textit{lexical} and \textit{WHOIS} features to detect malicious URLs has been quite successful, with a 90-95\% detection rate (Ma et al., 1). Lexical features are the textual properties of the URL itself, and WHOIS data gives the registration date/user of the given domain. It should be noted, however, that these researchers did not consider contextual information such as the URL page content or the type of email the URL is embedded in.
 
-There are a number of reasons not to consider context or page content, and concentrate on the URL itself. To download a page's content every time is expensive and slow, and does not result in a lightweight model. In addition, taking URL context into account restricts the model from being applied to contexts outside of those that it was trained on. It would be best to have a model that is flexible enough to be applied to any context (for instance, email, games, chat, calendars, etc.). 
+There are a number of reasons not to consider context or page content, and concentrate on the URL itself. To download a page's content every time is expensive and slow. In addition, taking URL context into account, such as what kind of email the URL was embedded in, might make it harder to build a generalizable system. It would be best to have a model that is flexible enough to be applied to any context (for instance, email, games, chat, calendars, etc.). 
 
-It is also important to consider how many features to use. In the study by Ma et al., it was found that models with more features typically perform better than models with fewer features. They found that a feature set with 4 features attained a 10.12\% error rate, while a feature set with 3,967 features was able to gain a 3.22\% error rate (Ma et al., 5). Thus, more features do seem to lead to better results. However, existing research seems to suggest that there are diminishing returns for every feature we put in after a certain point.
+It is also important to consider how many features to use. In the study by Ma et al., it was found that models with more features typically perform better than models with fewer features. They found that a feature set with 4 features attained a 10.12\% error rate, while a feature set with 3,967 features was able to gain a 3.22\% error rate (Ma et al., 5). Thus, more features do seem to lead to better results. However, existing research, such as that of Ma et al., seems to suggest that there are diminishing returns for every feature we put in after a certain point.
 
-Since we are not given the WHOIS data in the URL dataset given to us by Proofpoint, we will have to construct features of our own that perform just as well. We would like to investigate whether it would be possible to lookup WHOIS features for URLs our model is less certain about, but this will depend on whether Proofpoint is interested in allocating computing power for such lookups.
+Since WHOIS data is not included in the URL dataset given to us by Proofpoint, we will have to construct features of our own that perform just as well. We would, however, like to keep open the possibility of looking up WHOIS features for URLs our model is less certain about. As these lookups can be highly expensive, different, well-performing features are a priority.
 
 For the purposes of our project, it seems most efficient to begin with a small number of features first. Our aim is to figure out which ones are best at differentiating malicious and safe URLs, and in later iterations considering raising the number of features.
 
@@ -305,15 +305,15 @@ We will modify the above procedure as necessary for different environments (desc
 
 \section{Deployment Strategy}
 
-For this project, we plan to employ an agile approach where, every few weeks, we deliver a new or improved system and build upon our existing software after obtaining feedback on it. Thus, the process of our deployment strategy will follow these three stages:
+For this project, we plan to employ an agile approach where, every few weeks, we deliver a new or improved system and build upon our existing software after obtaining feedback on it. The process of our deployment strategy will follow these three stages:
 
 \begin{enumerate} \itemsep0em
 \item Construct a model that works in our local environment and continuously improve upon it
-\item Have our system work in Proofpoint?s lab environment and acquire feedback
+\item Have our system work in Proofpoint's lab environment and acquire feedback
 \item Move the system to production for additional performance evaluation
 \end{enumerate}
 
-Given that we plan to produce several versions of our software, we plan to work through several iterations of the strategy laid out above. Each version of our software will proceed through these stages with the results feeding back into previous levels in order to continuously improve on our existing systems. 
+Each version of our software will proceed through these stages with the results feeding back into previous levels in order to continuously improve on our existing systems. 
 
 %%%
 
@@ -353,11 +353,11 @@ In order to follow through with our agile deployment strategy, we have set up a 
 
 To this end, we will begin Phase 1 by working on two approaches to our classifier, Naive Bayes and SVMs. Within the month of October we expect to have our first deliverable: a basic URL classifier that, when given a URL and meta-data about the URL, predicts the probability of the URL being malicious or not. It is important that our code is well-documented because it may be used or altered by other people in the future; therefore, we will have documentation within the classifier that will assist readers in understanding our design.
 
-Once our two initial programs are completed, we plan to move into the next phase of our initial iteration where the team will focus their efforts into improving the initial software and possibly reiterate through Phase 1 with a new version of a classifier that uses a different approach. We may, at this point, pick one classifier to focus our efforts on. We hope to be working in the Proofpoint lab environment and making use of the sandboxing environment in order to improve our classifier?s detection rate.
+Once our two initial programs are completed, we plan to move into the next phase of our initial iteration where the team will focus their efforts into improving the initial software and possibly work on a new classifier, following the same procedure as in Phase 1. We may, at this point, pick one classifier to focus our efforts on. We hope to be working in the Proofpoint lab environment and making use of the sandboxing environment in order to improve our classifier's detection rate.
 
 The second deliverable that we expect to have at the end of this phase is a working classifier with a malicious URL detection rate of above 70\%. During this time we will also be working on our third deliverable for this phase, a mid-year report. This is an update where we describe our progress on the project, design decisions that we have made, and a detailed description of what we will do in the second half of the year.
 
-Our third phase mainly consists of the team surpassing previous milestones in accurate detection rate. We expect that by this point we will be focusing our efforts on mainly building upon existing systems rather than creating new ones. New features and machine learning techniques will be incorporated into the current system in an attempt to improve it. We hope to be at this point of our project by the start of the spring semester.
+Our third phase mainly consists of the team surpassing previous milestones in accurate detection rate. We expect that by this point we will be focusing our efforts on building upon existing systems rather than creating new ones. New features and machine learning techniques will be incorporated into the current system in an attempt to improve it. We hope to be at this point of our project by the start of the spring semester.
 
 The final phase of our project's schedule includes various deliverables that we will be focusing on in order to conclude our project. The main deliverable of this phase is the final version of our software which will be the cumulative product of all our work during the year. We expect to have a system with a high detection rate and appropriate features by this point. We will also have the corresponding documentation to go along with our system. The second deliverable for the final phase is a  final report that summarizes the results of our project. This report will give an overview of the problem, a description of what we did over the course of the year, any results we obtained from our project, and recommendations for future work. The final deliverable is a poster summarizing our project and the progress we made over the course of the year.
 
