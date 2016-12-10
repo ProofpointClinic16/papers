@@ -248,15 +248,36 @@ In order to take advantage of the next growing trend in machine learning, deep l
 
 \subsection{Naive Bayes}
 
-We intend to continue working with the scikit-learn implementation of the Naive Bayes classifier, since this offers many more options to explore than the previous implementation we were using. In particular, we intend to investigate the different types classifiers available. We are currently using a Multinomial model (which uses how frequently a feature is associated with a particular class), but will consider using the Bernoulli (which uses whether a feature is present or not) and Gaussian models (which assumes all features have a normal distribution).
-
-In addition, scikit-learn makes it straightforward to add different types of features to the pipeline of the classifier. Currently, we are only using the character 4-grams, but we intend to look into adding more features around the string of the URL itself (such as tokenization on punctuation) as well as around other data we get from Proofpoint (such as the IP address associated with the email, the number of messages this IP has sent before, and so on).
+We intend to continue working with the scikit-learn implementation of the Naive Bayes classifier, since this offers many more options to explore than the previous implementation we were using. In particular, we intend to investigate the different types classifiers available. In addition, scikit-learn makes it straightforward to add different types of features to the pipeline of the classifier. Currently, we are only using the character 4-grams, but we intend to look into adding more features around the string of the URL itself as well as around other data we get from Proofpoint. See the appendix for more details.
 
 Notably, we have yet to implement any kind of thresholding that would give us an indication of when URLs ought to be sandboxed. We hope to achieve better results on our data set before moving on to estimating thresholds.
 
 \subsection{TensorFlow}
 
 The TensorFlow open source code we are currently using gives room for custom parameter setting, such as the maximum number of features being used within the classifier, so next semester we plan on thoroughly testing these customizable parameters within our classifier in order to determine which changes yield the fastest and best results. Maximum number of features used is one of the parameters that we are allowed to change; thus, we will test which features and number of features improve performance. We will also test how long we should be training our classifier by analyzing the cost-benefit of spending different amounts of iterations on the training of the classifier. Most importantly, TensorFlow provides a variety of optimization algorithms to use, which differ in how they minimize the error of classifications. We will test these algorithms to determine which one works the best for our classification purposes.
+
+%%%
+
+\newpage
+
+\section{Appendix}
+
+A more detailed list of the experiments we plan to perform for Naive Bayes is given below.
+\\\\
+\textbf{Classifiers}
+\begin{itemize} \itemsep0em
+\item Multinomial (current) -- uses how frequently a feature is associated with a particular class
+\item Bernoulli -- uses whether a feature is present or not
+\item Gaussian -- assumes all features have a normal distribution
+\end{itemize}
+
+
+\noindent \textbf{Features}
+\begin{itemize} \itemsep0em
+\item Tokenization on punctuation of the URL (as in our previous classifier)
+\item IP address associated with email
+\item Number of messages sent from this IP address before
+\end{itemize}
 
 %%%
 
